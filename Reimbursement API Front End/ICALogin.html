@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICA Login</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+</head>
+
+<body style="background-image: url('https://i.redd.it/84i9a3bfuob31.jpg'); background-size: 2400px 800px;">
+
+    <div class="grid-container">
+
+
+    <div class="icaHeading">
+    <h1>ICA Login</h1>
+    <input class="input-group-prepend" placeholder="username" id="userInput" type="text">
+    <input class="input-group-prepend" placeholder="password" id="passInput" type="text">
+
+    <button onclick="login()">Login </button>
+    </div>  
+</body>
+
+<script>
+    const userInput = document.getElementById("userInput");
+    const passInput = document.getElementById("passInput");
+
+    async function login(){
+
+        const loginInfo ={
+            username: userInput.value,
+            password: passInput.value
+        }
+
+        const details ={
+            method: 'POST',
+            body: JSON.stringify(loginInfo)
+        }
+        
+        const httpResponse = await fetch("http://localhost:7000/login",details) 
+        const jwt = await httpResponse.text();
+        localStorage.setItem('jwt',jwt);
+        console.log(localStorage.getItem('jwt'))
+        const token = localStorage.getItem('jwt');
+        const decoded = JSON.parse(atob(token.split('.')[1]));
+        console.log(decoded)
+        if (decoded.role == "Manager"){
+            location.replace("ICAManager.html")
+        }else{
+            location.replace("ICAHome.html")
+        }
+    }
+</script>
+
+</html>

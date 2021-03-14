@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICA Manager Homepage</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+</head>
+<body>
+
+    <div class="grid-container">
+
+
+    <div class="icaHeading">
+    <h1>ICA Manager Homepage</h1>
+    </div>  
+
+    <div class="requestTable">
+        <table  class="table table-dark">
+            <thead><th>id</th><th>employeeId</th><th>amount</th><th>reason</th><th>submitDate</th><th>status</th><th>reviewDate</th><th>reviewReason</th><th>reviewerId</th></thead>
+            <tbody id="requestTableBody">
+    
+            </tbody>
+        </table>
+    </div>
+
+    <div class="requestForm">
+        <h2>Update a Request</h2>
+
+        <label for="reviewIdInput">Manager ID</label>
+        <input class="input-group-prepend" placeholder="ex 4" id="reviewIdInput" type="number">
+        <hr>
+
+        <label for="reasonInput">Reason</label>
+        <input class="input-group-prepend" placeholder="ex not an approved expense" id="reasonInput" type="text">
+        <hr>
+
+        <label for="statusInput">Status</label>
+        <input class="input-group-prepend" placeholder="ex APPROVED" id="statusInput" type="text">
+        <hr>
+
+    
+        <label for="reviewDateInput">ReviewDate</label>
+        <input class="input-group-prepend" placeholder="1650000" id="reviewDateInput" type="number">
+        <hr>
+
+        <label for="amountInput">Amount</label>
+        <input class="input-group-prepend" placeholder="500" id="amountInput" type="number">
+        <hr>
+        
+        <label for="reqReasonInput">Request Reason</label>
+        <input class="input-group-prepend" placeholder="hotel room" id="reqReasonInput" type="text">
+        <hr>
+        
+        <label for="employeeIdInput">EmployeeId</label>
+        <input class="input-group-prepend" placeholder="3" id="employeeIdInput" type="number">
+        <hr>
+        
+        <label for="submitDateInput">SubmitDate</label>
+        <input class="input-group-prepend" placeholder="1650000" id="submitDateInput" type="number">
+        <hr>
+
+    </div>
+
+    
+    </div>
+    
+</body>
+<script>
+    const requestTableBody = document.getElementById("requestTableBody");
+    const reviewIdInput = document.getElementById("reviewIdInput");
+    const reasonInput = document.getElementById("reasonInput");
+    const statusInput = document.getElementById("statusInput");
+    const reviewDateInput = document.getElementById("reviewDateInput");
+    const employeeIdInput = document.getElementById("employeeIdInput");
+    const submitDateInput = document.getElementById("submitDateInput");
+    const amountInput = document.getElementById("amountInput");
+    const reqReasonInput = document.getElementById("reqReasonInput");
+
+
+
+    getAllRequests();
+
+    async function getAllRequests(){
+        const httpResponse = await fetch("http://localhost:7000/reimbursement");
+        const requests = await httpResponse.json();
+        let tbodyHtml = ``;
+
+        for(const request of requests){
+            tbodyHtml +=   `
+            <tr>
+            <td> ${request.reqId}</td>
+            <td> ${request.employeeId}
+            <td> ${request.amount}</td>
+            <td> ${request.reason}</td>
+            <td> ${request.submitDate}</td>
+            <td> ${request.approvalStatus}</td>
+            <td> ${request.approvalDate}</td>
+            <td> ${request.reviewReason}</td>
+            <td> ${request.reviewId}</td>
+            <td> <button type="button" class="btn btn-outline-danger" onclick="deleteRequestById(${request.reqId})">Delete </button></td>
+            <td> <button type="button" class="btn btn-outline-danger" onclick="updateRequest(${request.reqId})">Update </button></td>
+            </tr>
+            `;
+        }
+
+        requestTableBody.innerHTML = tbodyHtml;
+    }
+
+    async function updateRequest(id = 0){
+
+        const request = {
+            reqId: id,
+            amount: amountInput.value,
+            reason: reqReasonInput.value,
+            reviewReason: reasonInput.value,
+            submitDate: submitDateInput.value,
+            approvalDate: reviewDateInput.value,
+            reviewId: reviewIdInput.value,
+            employeeId: employeeIdInput.value,
+            status: statusInput.value
+        }
+
+        const jwt = localStorage.getItem('jwt');
+
+        const details ={
+            method:"PUT",
+            body: JSON.stringify(request),
+            headers:{
+                "Authorization": jwt
+            }
+        }
+
+        const httpResponse = await fetch(`http://localhost:7000/reimbursement/${id}`,details);
+
+        if(httpResponse.status === 201){
+            alert("Your request has been updated")
+            getAllRequests()
+        }else{
+            alert("Request was not saved")
+        }
+
+    }
+
+    async function deleteRequestById(id = 0){
+        
+        const jwt = localStorage.getItem('jwt');
+        const details = {
+            method:"DELETE",
+            headers:{
+                "Authorization": jwt
+            }
+        }
+
+        const httpResponse = await fetch(`http://localhost:7000/reimbursement/${id}`,details)
+        getAllRequests();
+
+    }
+
+
+</script>
+</html>
